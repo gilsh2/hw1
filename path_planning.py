@@ -65,9 +65,6 @@ def astar(terrain:Map, start:Point, goal:Point) -> Tuple[int, int, Optional[List
  
     return (visit_count, bestcost, retpath)    
 
-
-
-
 def best_first(terrain:Map, start:Point, goal:Point) -> Tuple[int, int, Optional[List[Point]]]:
     # In the open list we use heuristic values as the priority
     open_list: List[Tuple[int, Point]] = [(manhattan_distance(start, goal), start)]
@@ -172,9 +169,6 @@ def dijkstra(terrain:Map, start:Point, goal:Point) -> Tuple[int, int, Optional[L
  
     return (visit_count, bestcost, retpath)    
 
- 
-   
-
 def breadth_first(terrain:Map, start:Point, goal:Point) -> Tuple[int, int, Optional[List[Point]]]:
     open_list: List[Point] = [start]   
  
@@ -235,10 +229,6 @@ def breadth_first(terrain:Map, start:Point, goal:Point) -> Tuple[int, int, Optio
  
     return (visit_count, bestcost, retpath)    
 
-       
-   
-    
-
 def compare_points(p1:Point, p2:Point) -> bool:
     return (p1[0] == p2[0] and   p1[1] == p2[1] )
 
@@ -274,16 +264,16 @@ def find_neighbors(terrain:Map, p:Point) -> List[Tuple[Point, int]]:
     x,y = p
     neighbors : List[Tuple[Point,int]] = []
     if(x-1) >= 0 :
-        cost = cordinate_to_cost(terrain,x-1,y)
+        cost = coordinate_to_cost(terrain,x-1,y)
         neighbors.append  ( ( (x-1,y) ,cost)    )
     if (y-1) >= 0 :  
-        cost = cordinate_to_cost(terrain,x,y-1)
+        cost = coordinate_to_cost(terrain,x,y-1)
         neighbors.append ( ((x,y-1) ,cost)    )
     if (x+1) <= len(terrain[0])-1 :  
-        cost = cordinate_to_cost(terrain,x+1,y)
+        cost = coordinate_to_cost(terrain,x+1,y)
         neighbors.append ( ((x+1,y) ,cost)    )    
     if (y+1) <= len(terrain) -1 :        
-       cost = cordinate_to_cost(terrain,x,y+1)
+       cost = coordinate_to_cost(terrain,x,y+1)
        neighbors.append ( ((x,y+1) ,cost)    )        
    
     # Feel free to introduce other variables if they'd be helpful too.
@@ -291,7 +281,7 @@ def find_neighbors(terrain:Map, p:Point) -> List[Tuple[Point, int]]:
 
 
 
-def cordinate_to_cost (terrain: Map, x:int, y:int ):
+def coordinate_to_cost (terrain: Map, x:int, y:int ):
    
     if terrain[y][x]  == '🌿' or  terrain[y][x] ==  '🌲' or  terrain[y][x] == '🌉' :
         return 1
@@ -302,7 +292,7 @@ def cordinate_to_cost (terrain: Map, x:int, y:int ):
     if terrain[y][x] == '🌊' :
         return 5
     
-    raise ValueError(terrain[x][y] + " is not valid")
+    raise ValueError(terrain[y][x] + " is not valid")
 
 
 
@@ -313,9 +303,6 @@ def load_map(mapfile:str) -> Map:
         return [list(line.rstrip()) for line in infile]
 # Example
 terrain = load_map('terrain.txt')
-for x in enumerate(terrain):
-    print(x)
- 
 
 #print("Best_First (2,3) -> (7,0)")
 #visited, cost, path, dt = run_trial(t, best_first, (2, 3), (7, 0))
