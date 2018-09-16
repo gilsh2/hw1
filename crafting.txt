@@ -1,0 +1,13 @@
+Alon Lapid, Meredith Simpson
+
+1: No they do not as the key is the name of the recipe and they each have different names.
+2: They are all states. The difference is in the semantics of what each state represents. Initial and Goal represent the state that is started at and the end state respectively. Produces, Requires and Consumes are lists of items (technically a state) which states what is produced, what is required and what is consumed by a specific recipe.
+3: Look-up in a dictionary is a O(log(n)) operation as it is implemented as a binary search tree that is traversed in order to find the key. Finding a value from an array is an O(1) operation going to the specific index of the array.
+4: List is a much richer data structure that consumes more memory whereas the array.array is a barebone continious block of memory.
+5: A point was the state representation of path_planning.py.
+6: Stepping to one of the neighbors of the point was the action representation.
+7: Assuming the question is in regards to path_planning.py, there the maximum possible actions are 4 (max number of neighbors) depending on where the point is located on the 2D grid, if at the edges then there might be 3, at the corner 2, and in the middle 4.
+8: Instead of find_neighbor we would a function called find_possible_states that will take a state compute all the qualifying actions for the state and for each action compute the produced state.
+9: The heuristic would be how close the a state is to the goal state. And we can define multiple distance measures between states. One possible measure would be how many items in the current state are missing to satisfy the goal state. The heuristic is admissible depending upon how the cost itself is defined. On arbitrary cost it will not be necessarily admissable. This is a problem.
+10: It can solve getting driving direction from any route in the U.S. from another route in the U.S. It will probably evaluate hundreds of thousands of nodes which are specific driving sections. Typically driving direction are satisfied within 15 seconds.
+11: 
