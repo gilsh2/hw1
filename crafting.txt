@@ -10,4 +10,16 @@ Alon Lapid, Meredith Simpson
 8: Instead of find_neighbor we would a function called find_possible_states that will take a state compute all the qualifying actions for the state and for each action compute the produced state.
 9: The heuristic would be how close the a state is to the goal state. And we can define multiple distance measures between states. One possible measure would be how many items in the current state are missing to satisfy the goal state. The heuristic is admissible depending upon how the cost itself is defined. On arbitrary cost it will not be necessarily admissable. This is a problem.
 10: It can solve getting driving direction from any route in the U.S. from another route in the U.S. It will probably evaluate hundreds of thousands of nodes which are specific driving sections. Typically driving direction are satisfied within 15 seconds.
-11: 
+11: In a graph search the goal is to get to the goal node. In planning the goal is to get to a state that satisties the requirments of the goal state. For example if you need to be able to gradute from Pomona with CS major you need to get into a state that satisties the graduation requirments, namly take and pass the required classes ect.
+12: In graph search the precondition for traveling to a node is that there is an edge between the current node and the next node. In planning the precondition for traveling is that the requirments for moving to the next state (node) are met.
+13: In graph search detecting cycles is done by using hash table to check if a node was already seen. But in planning it is harder as you may not visit the same state again but you can make no progress or even regress compared to the goal state.
+14: In crafting you may get to the same state twice but you can get to a state that is no better then a previous state with regard to the "distance" from the goal state.
+15: The abstract states will be :
+	With stone pickaxe
+        Without stone pickaxe and with the requirments for both punch for wood and  wood planks met
+        Without stone pickaxe and with the requirments met for punch for wood only
+        Without stone pickaxe and with the requirments met for wood planks only
+        Without stone pickaxe and with non of the requirments met for either of the recipes 
+
+
+
