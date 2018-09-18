@@ -1,5 +1,5 @@
 import json
-from typing import NamedTuple, Dict, Tuple, Optional, Sequence, List
+from typing import NamedTuple, Dict, Tuple, Optional, Sequence, List,Set,FrozenSet
 import array
 import heapq
 import time
@@ -15,7 +15,7 @@ items_to_indices: Dict[str, int] = {
     item2: index2 for index2, item2 in enumerate(items_by_index)
 }
 
-
+ 
 
 class State:
     items: array.array
@@ -80,6 +80,43 @@ class Recipe(NamedTuple):
     consumes: State
     requires: State
     cost: int
+
+recipes: Dict[str, Recipe] = {}
+for name, rule in Crafting['Recipes'].items():
+    recipes[name] = Recipe(
+        State.from_dict(rule.get('Produces', {})),
+        State.from_dict(rule.get('Consumes', {})),
+        State.from_dict({item: 1 if req else 0
+                         for item, req in rule.get('Requires', {}).items()}),
+        rule['Time']
+    )   
+
+class Proposition(NamedTuple):
+    item: int
+    at_least: int
+
+def state_propositions(state: State) -> Set[Proposition]:
+    propositions: Set[Proposition] = set()
+    
+    for i in range(len (state.items)) :
+        for k in range(1,state.items[i]+1):
+            propositions.add(Proposition(i,k))
+     
+    return propositions
+
+
+def recipe_to_propositions(recipe: Recipe) -> Set[Proposition]:
+    propositions: Set[Proposition] = set()
+    # G. Do something with recipe.consumes, recipe.produces, and recipe.requires.
+    # Emit, for this recipe, all the propositions entailed by the preconditions and the _minimal_ set of propositions embodied in the preconditions (i.e., don't need to output wood >= 2, wood >= 1, wood >= 0 if the recipe creates 2 wood.)
+    r = state_propositions(recipe.requires)
+    net = state_propositions(recipe.produces-recipe.consumes)      
+        
+    propositions |= r
+    propositions |= net      
+    
+    return propositions 
+
     
 def preconditions_satisfied(state: State, recipe: Recipe) -> bool:
   
@@ -94,8 +131,24 @@ def apply_effects(state: State, recipe: Recipe) -> State:
      newstate  =  state - recipe.consumes + recipe.produces
     
      return newstate 
+ 
+def see_state(state:State, combinations:List[Set[Proposition]], seen_combinations:Set[FrozenSet[Proposition]]) -> bool:
+    any_new = False
+    state_props = state_propositions(state)
+    for combo in combinations:
+        if combo in seen_combinations:
+            continue 
+        
+        if(state_props.issuperset(combo)) :
+            seen_combinations.add(combo)
+            any_new = True
+        
+    return any_new
+
    
-    
+recipe_propositions = set()
+for r in recipes.values():
+    recipe_propositions |= recipe_to_propositions(r)    
 
 def plan_dijkstra(initial: State, goal: State, limit:int) -> Tuple[int, int, Optional[List[str]]]:
     start_time = time.time()
@@ -118,8 +171,7 @@ def plan_dijkstra(initial: State, goal: State, limit:int) -> Tuple[int, int, Opt
             print("too many iterations , current state=",curstate)            
             break
         
-        
-                 
+                         
         for candidaterecipename in recipes:
             if (preconditions_satisfied(curstate,recipes[candidaterecipename])) == False:
                 continue 
@@ -154,16 +206,36 @@ def plan_dijkstra(initial: State, goal: State, limit:int) -> Tuple[int, int, Opt
       
    
     return (visit_count, bestcost, retpath)       
+
+def plan_width(initial: State, goal: State, WMax: int) -> Tuple[int, int, Optional[List[str]]]:
+    start_time = time.time()
+    all_propositions = recipe_propositions | state_propositions(initial) | state_propositions(goal)
+    all_combinations: List[FrozenSet[Proposition]] = []
+    # Increase W up to WMax
+    for W in range(1, WMax + 1):
+        visited = 0
+        # Calculate all combinations of propositions at size W and add to all_combinations
+        all_combinations += [frozenset(props) for props in itertools.combinations(all_propositions, W)]
+        # Sanity check that this is 6279 for W=3, for example
+        print("W=",W,"Combination count=",len(all_combinations))
+        # Track, for each combination (by index), whether we have seen this combination before (0 for no, >0 for yes)
+        
+        seen_combinations: Set[FrozenSet[Proposition]] = set()
+        # Initialize seen_combinations
+        see_state(initial, all_combinations, seen_combinations)
+        open_list: List[Tuple[int, State]] = [(0, initial)]
+        best_costs: Dict[State, int] = {initial: 0}
+        best_from: Dict[State, List[str]] = {initial: []}
+        while open_list:
+            cost, state = heapq.heappop(open_list)
+            visited += 1
+            # I. This should look like your graph search (Dijkstra's is a nice choice), except...
+            # Call see_state on newly expanded states to update seen_combinations and use its return value to decide whether to add this state to the open list (is that the only thing that determines whether it should go on the open list?)
+          
+    return visited, -1, None
+
     
-recipes: Dict[str, Recipe] = {}
-for name, rule in Crafting['Recipes'].items():
-    recipes[name] = Recipe(
-        State.from_dict(rule.get('Produces', {})),
-        State.from_dict(rule.get('Consumes', {})),
-        State.from_dict({item: 1 if req else 0
-                         for item, req in rule.get('Requires', {}).items()}),
-        rule['Time']
-    )    
+
 #print(items_to_indices)
 
 #print(Crafting['Items'])
@@ -178,9 +250,15 @@ assert(initial >= goal)
 #all = initial + goal
 #print("all",initial + goal)
 
-print(plan_dijkstra(State.from_dict({}),
+
+#print(plan_width(State.from_dict({'wood':1}),State.from_dict({'iron_pickaxe':1}),4))
+
+
+'''
+#print(plan_dijkstra(State.from_dict({}),
                     State.from_dict({'stone_pickaxe':1}),
                     200000))
-print(plan_dijkstra(State.from_dict({'bench':1,'stone_pickaxe':1}),
+#print(plan_dijkstra(State.from_dict({'bench':1,'stone_pickaxe':1}),
                     State.from_dict({'ingot':1}),
                     200000))
+'''
