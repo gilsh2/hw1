@@ -1,0 +1,29 @@
+Alon Lapid, Meredith Simpson
+
+1: A set of nodes (vertices) with a set of pairs of nodes (connecting edges). A representation of a graph as a data structure could be a Node class that has a value and also a list of connected Nodes.
+2: I have encountered Breadth-first, Dijkstra’s and Best-first as part of a data structure and algorithms class
+3: Another usage of graph can be used for a fast search for example like in a binary tree. An example of a compelling case for graph search would be to find a connection between two people on a social media site knowing their friend connections.
+4: We can represent the graph as a 2D array and because of the physical nature of the problem this still represents every node and connections to neighboring nodes.
+5: terrain.txt is a text file with lines where each line consists of a set of characters. The load_map is reading line by line and for each line it creates a list of the characters in it and also creates a list of all the lists, by that creating a de facto 2D array.
+6: We would write terrain[y][x] is a spot at vertical offset of y and horizontal offset of x where both are positive.
+7: The neighbors of the cell (3,3) are (2,3), (4,3), (3,2), (3,4). Given (x,y) the neighbors are (x-1, y), (x+1, y), (x, y+1), (x, y-1) assuming that coordinates do not go outside of the boundary of the array.
+8: Breadth-first search and Dijkstra’s algorithm are considered *uninformed* because they do not know anything about the structure of the graph, nor assume anything about the optimal path without exploration.
+9: Newly expanded nodes due to the usage of the queue, go to the end of the list. The name of this data structure is a queue.
+10: The first path found by best-first search is not necessarily cost-optimal as cost is not accounted for, it is a way to quickly find *some* solution that has *a chance* of being optimal but this is no guarantee. It is step-optimal namely it is making optimal step progress. The overall result is not cost-optimal, the first path that is found is also the result of the search.
+11: The state is the current point and the transition relation are the found neighbors for this point.
+12: Dijkstra’s algorithm considers the cost to get to the current node so far as well as the cost of moving to each one of the neighbors and Breadth-first search does not consider cost when it is attempting to make state transitions.
+13: Dijkstra's has fewer vistited nodes compared to Breadth-first search but finds the same optimal path.
+14: The first path found by Dijkstra's is cost-optimal since we are always transitioning to the neighbor that ensures the lowest cost. Dijkstra's first found path is always the optimal path.
+15: Also in Dijkstra's we do not expand previously explored nodes with higher cost. Having the node already evaluated with lower cost means that there is no need to evaluate it with a higher cost.
+16: This is the Manhattan Distance between the point (x,y) and (gx, gy) i.e. abs(x - gx) + abs(y - gy)
+17: This is best-first search which does not necessarily give optimal path as the first path found.
+18: Best-first should return the first path found as it is not designed to find the optimal path (based on cost) it is trying to find a path quickly that based on hueristic also has a reasonable cost.
+19: Best-first search should not avoid re-expanding nodes due to higher cost because it ignores cost completly and relies upon the heuristic.
+20: Best-first search typically visits less nodes but might give suboptimal found path solution.
+21: The main difference is Dijkstra's takes into account cost while Best-first takes into account the heuristic.
+22: Yes this is astar search and the way to combine is summation of the heuristic function and the cost. The priority will always be the summation of the heuristic and the cost, and that is exactly what we are going to track in the best_cost dictionary.
+23: Astar visits less nodes than Dijkstra's and finds the same optimal path.
+24: Yes it is guaranteed to be optimal as long as the heuristic is admissible namely never overestimates cost.
+25: Then Astar will become Dijkstra's.
+26: This will become Best-first.
+27: If we overestimate the heuristic then astar will visit more nodes and the path found is not always optimal. 

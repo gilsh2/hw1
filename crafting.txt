@@ -1,0 +1,28 @@
+Alon Lapid, Meredith Simpson
+
+1: No they do not as the key is the name of the recipe and they each have different names.
+2: They are all states. The difference is in the semantics of what each state represents. Initial and Goal represent the state that is started at and the end state respectively. Produces, Requires and Consumes are lists of items (technically a state) which states what is produced, what is required and what is consumed by a specific recipe.
+3: Look-up in a dictionary is a O(log(n)) operation as it is implemented as a binary search tree that is traversed in order to find the key. Finding a value from an array is an O(1) operation going to the specific index of the array.
+4: List is a much richer data structure that consumes more memory whereas the array.array is a barebone continious block of memory.
+5: A point was the state representation of path_planning.py.
+6: Stepping to one of the neighbors of the point was the action representation.
+7: Assuming the question is in regards to path_planning.py, there the maximum possible actions are 4 (max number of neighbors) depending on where the point is located on the 2D grid, if at the edges then there might be 3, at the corner 2, and in the middle 4.
+8: Instead of find_neighbor we would a function called find_possible_states that will take a state compute all the qualifying actions for the state and for each action compute the produced state.
+9: The heuristic would be how close the a state is to the goal state. And we can define multiple distance measures between states. One possible measure would be how many items in the current state are missing to satisfy the goal state. The heuristic is admissible depending upon how the cost itself is defined. On arbitrary cost it will not be necessarily admissable. This is a problem.
+10: It can solve getting driving direction from any route in the U.S. from another route in the U.S. It will probably evaluate hundreds of thousands of nodes which are specific driving sections. Typically driving direction are satisfied within 15 seconds.
+11: In a graph search the goal is to get to the goal node. In planning the goal is to get to a state that satisties to requirments of the goal state. For example if you need to be able to gradute from Pomona with CS major you need to get into a state that satisties the graduation requirments, namly take and pass the required classes ect.
+12: In graph search the precondition for traveling to a node is that there is an edge between the current node and the next node. In planning the precondition for traveling is that the requirments for moving to the next state (node) are met.
+13: In graph search detecting cycles is done by using hash table to check if a node was already seen. But in planning it is harder as you may not visit the same state again but you can make no progress or even regress compared to the goal state.
+14: In crafting you may get to the same state twice but you can get to a state that is no better then a previous state with regard to the "distance" from the goal state.
+15: The abstract states will be :
+	With stone pickaxe
+        Without stone pickaxe and with the requirments for both punch for wood and  wood planks met
+        Without stone pickaxe and with the requirments met for punch for wood only
+        Without stone pickaxe and with the requirments met for wood planks only
+        Without stone pickaxe and with non of the requirments met for either of the recipes 
+16: In 30 seconds a few million nodes can be visited and that coresponds to W=6 - We still have bugs in my impelementation so we can't be very specific 
+17: Increasing $WMax$ just makes the algorithem search for a longer time if it did not find a solution in a lower W. Decreasing W might make it not find a solution at all.
+18: Iterative widening is not guaranteed to give optimal solutions for this problem as you don't search all the options. You just need to decide how long are you are willing to run for finding a solution that is better than what has already been found. If it finds a solution that is good enough it is reasonable to stop.
+19: In the path planning context we can have W be the numbers of steps we want to move a head to compute "neighbors" - for example if W=2 we compute all the possible locations after 2 steps from the current position and possibly apply dijkstra's on those candidates.
+
+
