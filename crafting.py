@@ -110,11 +110,14 @@ def recipe_to_propositions(recipe: Recipe) -> Set[Proposition]:
     # G. Do something with recipe.consumes, recipe.produces, and recipe.requires.
     # Emit, for this recipe, all the propositions entailed by the preconditions and the _minimal_ set of propositions embodied in the preconditions (i.e., don't need to output wood >= 2, wood >= 1, wood >= 0 if the recipe creates 2 wood.)
     r = state_propositions(recipe.requires)
-    net = state_propositions(recipe.produces-recipe.consumes)      
+    p = state_propositions(recipe.produces)
+    c = state_propositions(recipe.consumes)
+                    
+    propositions |= r     
+    propositions |= c    
+    propositions |= p   
+   
         
-    propositions |= r
-    propositions |= net      
-    
     return propositions 
 
     
@@ -124,6 +127,8 @@ def preconditions_satisfied(state: State, recipe: Recipe) -> bool:
         return True
     
     return False
+
+
 
 def apply_effects(state: State, recipe: Recipe) -> State:
     # E. How do you make a new state out of a state and a recipe?
@@ -162,7 +167,8 @@ def plan_dijkstra(initial: State, goal: State, limit:int) -> Tuple[int, int, Opt
         #print("cost=",cost,"curstate=",curstate,"from=",gotfrom)
        
         if(curstate >= goal):
-            print ("found it!! Number of visited nodes=" ,visit_count , ". time it took=", time.time()-start_time,"seconds") 
+            x,rname,z = best_costs.get(curstate)
+            print ("found it!! Number of visited nodes=" ,visit_count , "state=",curstate,"goal=",goal,"by=",rname) 
             found = True;
             break;
                 
@@ -204,16 +210,15 @@ def plan_dijkstra(initial: State, goal: State, limit:int) -> Tuple[int, int, Opt
         retpath.insert(0,rname)       
         state = fromstate
       
-   
+    print("plan_dijkstra visited=",visit_count,"best_cost=",bestcost,"retpath=",retpath)
     return (visit_count, bestcost, retpath)       
 
 def plan_width(initial: State, goal: State, WMax: int) -> Tuple[int, int, Optional[List[str]]]:
-    start_time = time.time()
     all_propositions = recipe_propositions | state_propositions(initial) | state_propositions(goal)
     all_combinations: List[FrozenSet[Proposition]] = []
-    # Increase W up to WMax
-    for W in range(1, WMax + 1):
-        visited = 0
+    for W in range(1, WMax + 1):            
+        start_time = time.time()       
+        visit_count = 0
         # Calculate all combinations of propositions at size W and add to all_combinations
         all_combinations += [frozenset(props) for props in itertools.combinations(all_propositions, W)]
         # Sanity check that this is 6279 for W=3, for example
@@ -221,18 +226,64 @@ def plan_width(initial: State, goal: State, WMax: int) -> Tuple[int, int, Option
         # Track, for each combination (by index), whether we have seen this combination before (0 for no, >0 for yes)
         
         seen_combinations: Set[FrozenSet[Proposition]] = set()
-        # Initialize seen_combinations
-        see_state(initial, all_combinations, seen_combinations)
-        open_list: List[Tuple[int, State]] = [(0, initial)]
-        best_costs: Dict[State, int] = {initial: 0}
-        best_from: Dict[State, List[str]] = {initial: []}
+                
+        open_list: List[Tuple[int, State,str]] = [(0, initial, "")]         
+        best_costs: Dict[State, Tuple[int, str,State]] = {initial:(0, "",initial)}       
+        found = False
         while open_list:
-            cost, state = heapq.heappop(open_list)
-            visited += 1
-            # I. This should look like your graph search (Dijkstra's is a nice choice), except...
-            # Call see_state on newly expanded states to update seen_combinations and use its return value to decide whether to add this state to the open list (is that the only thing that determines whether it should go on the open list?)
+            # Dijkstra's search uses the priority queue data structure
+            cost, curstate , gotfrom  = heapq.heappop(open_list)       
+            
+            #print("cost=",cost,"curstate=",curstate,"from=",gotfrom)
+           
+            if(curstate >= goal):
+                x,rname,z = best_costs.get(curstate)
+                print ("found it!! Number of visited nodes=" ,visit_count , "state=",curstate,"goal=",goal,"by=",rname) 
+                found = True;
+                break;
+                    
+            visit_count += 1
+                                        
+            for candidaterecipename in recipes:
+                if (preconditions_satisfied(curstate,recipes[candidaterecipename])) == False:
+                    continue 
+                
+                candidatestate = apply_effects(curstate,recipes[candidaterecipename])
+                IsAddingValue = see_state(candidatestate,all_combinations,seen_combinations) 
+                if(IsAddingValue == False):
+                    continue
+               
+                                
+                if(candidatestate in  best_costs):
+                    #print("found=" , neighbor)     
+                    candidatestate_cost,rname,fromstate = best_costs.get(candidatestate)
+                    if(candidatestate_cost > cost + recipes[candidaterecipename].cost) :        
+                        #print("update cost for ", neighbor ,"newcost", cost + neighbor_cost)
+                        best_costs[candidatestate] = (cost + recipes[candidaterecipename].cost ,  gotfrom, curstate )   
+                        heapq.heappush (open_list,  (cost + recipes[candidaterecipename].cost, candidatestate,  candidaterecipename ) )     
+                else:    
+                        #print(neighbor ,"newcost", cost + neighbor_cost)
+                        best_costs[candidatestate] = (cost + recipes[candidaterecipename].cost ,  gotfrom,curstate )   
+                        heapq.heappush (open_list,  (cost + recipes[candidaterecipename].cost, candidatestate,  candidaterecipename ) )     
+                        
+        if(found == False) :                   
+            continue
+        
+        
+        state  = curstate
+        bestcost,dummy1,dummy2 = best_costs.get(state)   
+        retpath: List[str] = []
+        while(1):       
+            cost,rname,fromstate  = best_costs.get(state)      
+            if(rname == "") :           
+                break;
+            retpath.insert(0,rname)       
+            state = fromstate
           
-    return visited, -1, None
+        print("plan_width: visited=",visit_count,"best_cost=",bestcost,"retpath=",retpath)
+        return (visit_count, bestcost, retpath)   
+    
+    return visit_count, -1, None
 
     
 
@@ -251,7 +302,8 @@ assert(initial >= goal)
 #print("all",initial + goal)
 
 
-#print(plan_width(State.from_dict({'wood':1}),State.from_dict({'iron_pickaxe':1}),4))
+#print(plan_dijkstra(State.from_dict({'wood':1}),State.from_dict({'iron_pickaxe':1}),200000))
+print(plan_width(State.from_dict({'wood':1}),State.from_dict({'iron_pickaxe':1}),4))
 
 
 '''
